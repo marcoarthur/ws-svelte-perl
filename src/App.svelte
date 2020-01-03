@@ -49,13 +49,13 @@
 </div>
 
 
+<h3> Using Controls </h3>
 <div class="progress-1">
-  <h1> Using Controls </h1>
   <Progress value={$value} {max} {usePercent} />
 </div>
 <hr/>
+<h3> Using Web Sockets </h3>
 <div class="progress-1">
-  <h1> Using Web Sockets </h1>
   <Progress value={$completed} {max} {usePercent} />
 </div>
 
