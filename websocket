@@ -1,0 +1,38 @@
+#!/usr/bin/env perl
+use Mojolicious::Lite;
+use constant MAX_VALUE => 10;
+
+helper completed => sub {
+    state $total = -1;
+    $total = $total < MAX_VALUE ? $total + 1 : MAX_VALUE;
+    return { total => $total };
+};
+
+get '/' => sub {
+    my $c = shift;
+    $c->reply->static('index.html');
+};
+
+#
+# Partially from Mojolicious::Guides::Tutorial
+# and Mojolicious::Guides::Cookbook
+# and Mojolicious::Guides::Rendering
+#
+websocket '/ws' => sub {
+    my $c = shift;
+    $c->on(
+        json => sub {
+            my ( $c, $hash ) = @_;
+            $c->log->debug(" Received a msg ");
+
+            Mojo::IOLoop->recurring(
+                3 => sub {
+                    $c->log->debug( " Sending a msg " );
+                    $c->send( { json => $c->completed } );
+                }
+            );
+        }
+    );
+};
+
+app->start;
