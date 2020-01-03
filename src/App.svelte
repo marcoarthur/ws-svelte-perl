@@ -48,7 +48,14 @@
   </label>
 </div>
 
-<div class="progress-1"><Progress value={$value} {max} {usePercent} /> </div>
+
+<div class="progress-1">
+  <h1> Using Controls </h1>
+  <Progress value={$value} {max} {usePercent} />
+</div>
 <hr/>
-<div class="progress-1"><Progress value={$completed} {max} {usePercent} /> </div>
+<div class="progress-1">
+  <h1> Using Web Sockets </h1>
+  <Progress value={$completed} {max} {usePercent} />
+</div>
 
