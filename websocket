@@ -1,9 +1,14 @@
 #!/usr/bin/env perl
 use Mojolicious::Lite;
+use Mojo::JSON qw(encode_json);
 use constant {
     MAX_VALUE => 10,
     TIME      => 1,
 };
+
+BEGIN {
+    plugin 'Mojolicious::Plugin::EventSource', timeout => 300
+}
 
 helper task => sub {
     my $total = shift || MAX_VALUE;
@@ -56,6 +61,22 @@ websocket '/ws' => sub {
             $c->app->log->debug("WebSocket closed with status $code");
         }
     );
+};
+
+event_source '/event' => sub {
+    my $c    = shift;
+    my $task = $c->task;
+    $c->log->debug(" Received a subscriber ");
+
+    my $id = Mojo::IOLoop->recurring(
+        TIME() + 1 => sub {
+            $c->log->debug('sending tick');
+            $c->emit( "tick", encode_json( $task->() ) );
+        }
+    );
+
+    $c->on( finish => sub { Mojo::IOLoop->remove($id) if $id } );
+
 };
 
 app->start;

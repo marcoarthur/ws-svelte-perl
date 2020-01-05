@@ -9,6 +9,9 @@
   let value = tweened(0, { duration: 400 });
   let completed = tweened(0, { duration: 400});
   let data;
+  let sse;
+  let event_source = tweened(0, { duration: 400});
+  let edata;
 
   // The websocket to mojo server
   onMount( () => {
@@ -22,6 +25,14 @@
     ws.onopen = function (event) {
       ws.send(JSON.stringify({msg: 'I ♥ Mojolicious!'}));
     };
+
+    sse = new EventSource('http://127.0.0.1:8080/event');
+
+    sse.addEventListener('tick', function(event) {
+      edata = JSON.parse(event.data);
+      console.log(edata);
+      event_source.set(edata.total);
+    });
   });
 
 </script>
@@ -57,5 +68,10 @@
 <h3> Using Web Sockets </h3>
 <div class="progress-1">
   <Progress value={$completed} {max} {usePercent} />
+</div>
+<hr/>
+<h3> Using Source Events </h3>
+<div class="progress-1">
+  <Progress value={$event_source} {max} {usePercent} />
 </div>
 
