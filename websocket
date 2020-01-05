@@ -1,11 +1,14 @@
 #!/usr/bin/env perl
 use Mojolicious::Lite;
-use constant MAX_VALUE => 10;
+use constant {
+    MAX_VALUE => 10,
+    TIME      => 1,
+};
 
 helper completed => sub {
     state $total = -1;
-    $total = $total < MAX_VALUE ? $total + 1 : MAX_VALUE;
-    return { total => $total };
+    $total = $total <= MAX_VALUE ? $total + 1 : MAX_VALUE;
+    return $total > MAX_VALUE ? undef : { total => $total };
 };
 
 get '/' => sub {
@@ -20,17 +23,32 @@ get '/' => sub {
 #
 websocket '/ws' => sub {
     my $c = shift;
+    my $id;
+
     $c->on(
         json => sub {
             my ( $c, $hash ) = @_;
             $c->log->debug(" Received a msg ");
 
-            Mojo::IOLoop->recurring(
-                3 => sub {
-                    $c->log->debug( " Sending a msg " );
-                    $c->send( { json => $c->completed } );
+            $id = Mojo::IOLoop->recurring(
+                TIME() => sub {
+                    $c->log->debug(" Sending a msg ");
+
+                    if ( my $data = $c->completed ) {
+                        $c->send( { json => $data } );
+                    } else {
+                        Mojo::IOLoop->remove($id);
+                    }
                 }
             );
+        }
+    );
+
+    $c->on(
+        finish => sub {
+            my ( $c, $code, $reason ) = @_;
+            Mojo::IOLoop->remove($id) if $id;
+            $c->app->log->debug("WebSocket closed with status $code");
         }
     );
 };
