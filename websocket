@@ -5,10 +5,13 @@ use constant {
     TIME      => 1,
 };
 
-helper completed => sub {
-    state $total = -1;
-    $total = $total <= MAX_VALUE ? $total + 1 : MAX_VALUE;
-    return $total > MAX_VALUE ? undef : { total => $total };
+helper task => sub {
+    my $total = shift || MAX_VALUE;
+    my $counter = 0;
+
+    return sub {
+        return $counter > MAX_VALUE ? undef : { total => $counter++ };
+    };
 };
 
 get '/' => sub {
@@ -24,6 +27,7 @@ get '/' => sub {
 websocket '/ws' => sub {
     my $c = shift;
     my $id;
+    my $task = $c->task;
 
     $c->on(
         json => sub {
@@ -34,10 +38,11 @@ websocket '/ws' => sub {
                 TIME() => sub {
                     $c->log->debug(" Sending a msg ");
 
-                    if ( my $data = $c->completed ) {
+                    if ( my $data = $task->() ) {
                         $c->send( { json => $data } );
                     } else {
                         Mojo::IOLoop->remove($id);
+                        undef $id;
                     }
                 }
             );
