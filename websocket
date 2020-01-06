@@ -66,12 +66,15 @@ websocket '/ws' => sub {
 event_source '/event' => sub {
     my $c    = shift;
     my $task = $c->task;
+    $c->render_later;
     $c->log->debug(" Received a subscriber ");
 
     my $id = Mojo::IOLoop->recurring(
         TIME() + 1 => sub {
-            $c->log->debug('sending tick');
-            $c->emit( "tick", encode_json( $task->() ) );
+            if ( my $data = $task->() ) { 
+                $c->log->debug('sending tick');
+                $c->emit( "tick", encode_json( $data ) );
+            }
         }
     );
 
