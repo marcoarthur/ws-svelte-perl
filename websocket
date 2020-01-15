@@ -17,11 +17,6 @@ helper task => sub {
     };
 };
 
-#get '/' => sub {
-#    my $c = shift;
-#    $c->reply->static('index.html');
-#};
-
 #
 # Partially from Mojolicious::Guides::Tutorial
 # and Mojolicious::Guides::Cookbook
