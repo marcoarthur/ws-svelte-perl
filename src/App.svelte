@@ -15,7 +15,8 @@
 
   // The websocket to mojo server
   onMount( () => {
-    ws = new WebSocket('ws://127.0.0.1:8080/ws');
+    let conf = window.__app
+    ws = new WebSocket(conf.wsUrl);
 
     ws.onmessage = function (event) {
       data = JSON.parse(event.data);
@@ -26,7 +27,7 @@
       ws.send(JSON.stringify({msg: 'I ♥ Mojolicious!'}));
     };
 
-    sse = new EventSource('http://127.0.0.1:8080/event');
+    sse = new EventSource(conf.sseUrl);
 
     sse.addEventListener('tick', function(event) {
       edata = JSON.parse(event.data);

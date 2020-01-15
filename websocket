@@ -6,12 +6,10 @@ use constant {
     TIME      => 1,
 };
 
-BEGIN {
-    plugin 'Mojolicious::Plugin::EventSource', timeout => 300
-}
+plugin 'CORS';
 
 helper task => sub {
-    my $total = shift || MAX_VALUE;
+    my $total   = shift || MAX_VALUE;
     my $counter = 0;
 
     return sub {
@@ -19,10 +17,10 @@ helper task => sub {
     };
 };
 
-get '/' => sub {
-    my $c = shift;
-    $c->reply->static('index.html');
-};
+#get '/' => sub {
+#    my $c = shift;
+#    $c->reply->static('index.html');
+#};
 
 #
 # Partially from Mojolicious::Guides::Tutorial
@@ -61,25 +59,62 @@ websocket '/ws' => sub {
             $c->app->log->debug("WebSocket closed with status $code");
         }
     );
-};
+} => 'ws';
 
-event_source '/event' => sub {
+get '/event' => sub {
     my $c    = shift;
     my $task = $c->task;
-    $c->render_later;
+
     $c->log->debug(" Received a subscriber ");
 
+    $c->res->headers->content_type('text/event-stream');
+    $c->write;
     my $id = Mojo::IOLoop->recurring(
         TIME() + 1 => sub {
-            if ( my $data = $task->() ) { 
+            if ( my $data = $task->() ) {
                 $c->log->debug('sending tick');
-                $c->emit( "tick", encode_json( $data ) );
+                $c->write( "event:tick\ndata:" . encode_json($data) . "\n\n" );
             }
         }
     );
 
     $c->on( finish => sub { Mojo::IOLoop->remove($id) if $id } );
 
+} => 'sse';
+
+get '/' => sub {
+    my $c = shift;
+    $c->stash(
+        settings => {
+            wsUrl  => $c->url_for('ws')->to_abs,
+            sseUrl => $c->url_for('sse')->to_abs,
+        }
+    );
+    $c->render( template => 'app/root' );
 };
 
 app->start;
+
+__DATA__
+
+@@ app/root.html.ep
+% use Mojo::JSON 'to_json';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset='utf-8'>
+	<meta name='viewport' content='width=device-width,initial-scale=1'>
+
+	<title>Svelte app</title>
+
+	<link rel='icon' type='image/png' href='/favicon.png'>
+	<link rel='stylesheet' href='/global.css'>
+	<link rel='stylesheet' href='/build/bundle.css'>
+
+    <script> window.__app = <%== to_json $settings %> </script>
+	<script defer src='/build/bundle.js'></script>
+</head>
+
+<body>
+</body>
+</html>
