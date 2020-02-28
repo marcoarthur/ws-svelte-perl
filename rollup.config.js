@@ -3,8 +3,16 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
+import html from 'rollup-plugin-bundle-html';
 
 const production = !process.env.ROLLUP_WATCH;
+
+// Add helpers to create 'js' and 'css' for svelte
+const dest = process.env.WEBPACK_OUT_DIR || 'public/asset';
+function outPath(fn) {
+  const filename = production ? fn : fn.replace(/\[hash\]/, 'development');
+  return [dest, filename].join('/');
+}
 
 export default {
 	input: 'src/main.js',
@@ -12,7 +20,7 @@ export default {
 		sourcemap: true,
 		format: 'iife',
 		name: 'app',
-		file: 'public/build/bundle.js'
+		file: outPath('app.[hash].js')
 	},
 	plugins: [
 		svelte({
@@ -21,7 +29,7 @@ export default {
 			// we'll extract any component CSS out into
 			// a separate file  better for performance
 			css: css => {
-				css.write('public/build/bundle.css');
+				css.write(outPath('app.[hash].css'));
 			}
 		}),
 
@@ -36,9 +44,13 @@ export default {
 		}),
 		commonjs(),
 
-		// In dev mode, call `npm run start` once
-		// the bundle has been generated
-		!production && serve(),
+		// M::P::Webpack needs this file to know how to include assets
+    html({
+      dest,
+      filename: 'webpack.' + (production ? 'production' : 'development') + '.html',
+      inject: 'head',
+      template: '<html><head></head><body></body></html>',
+    }),
 
 		// Watch the `public` directory and refresh the
 		// browser on changes when not in production
@@ -52,20 +64,3 @@ export default {
 		clearScreen: false
 	}
 };
-
-function serve() {
-	let started = false;
-
-	return {
-		writeBundle() {
-			if (!started) {
-				started = true;
-
-				require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {
-					stdio: ['ignore', 'inherit', 'inherit'],
-					shell: true
-				});
-			}
-		}
-	};
-}
