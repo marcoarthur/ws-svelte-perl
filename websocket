@@ -7,6 +7,13 @@ use constant {
 };
 
 plugin 'CORS';
+plugin Webpack => {
+    process      => [qw(svelte css js)],
+    dependencies => {
+      core => 'rollup',
+      svelte => [qw(rollup-plugin-svelte svelte)]
+    },
+};
 
 helper create_task => sub {
     my $total   = shift || MAX_VALUE;
@@ -97,19 +104,18 @@ __DATA__
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset='utf-8'>
-	<meta name='viewport' content='width=device-width,initial-scale=1'>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width,initial-scale=1'>
 
-	<title>Svelte app</title>
+    <title>Svelte app</title>
 
-	<link rel='icon' type='image/png' href='/favicon.png'>
-	<link rel='stylesheet' href='/global.css'>
-	<link rel='stylesheet' href='/build/bundle.css'>
-
+    <link rel='icon' type='image/png' href='/favicon.png'>
+    <link rel='stylesheet' href='/global.css'>
+    %= asset "app.css"
     <script> window.__app = <%== to_json $settings %> </script>
-	<script defer src='/build/bundle.js'></script>
 </head>
 
 <body>
 </body>
+    %= asset "app.js"
 </html>
