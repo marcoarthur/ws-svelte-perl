@@ -8,7 +8,7 @@ use constant {
 
 plugin 'CORS';
 
-helper task => sub {
+helper create_task => sub {
     my $total   = shift || MAX_VALUE;
     my $counter = 0;
 
@@ -25,7 +25,7 @@ helper task => sub {
 websocket '/ws' => sub {
     my $c = shift;
     my $id;
-    my $task = $c->task;
+    my $task = $c->create_task;
 
     $c->on(
         json => sub {
@@ -58,7 +58,7 @@ websocket '/ws' => sub {
 
 get '/event' => sub {
     my $c    = shift;
-    my $task = $c->task;
+    my $task = $c->create_task;
 
     $c->log->debug(" Received a subscriber ");
 
