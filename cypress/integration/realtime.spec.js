@@ -12,7 +12,17 @@ context('Progress Bars', () => {
   // find websocket progress bar
   // body > div.ws-pbar > div > svg > text
   it('websocket progress bar', () => {
-    cy.get('div.ws-pbar div > svg > text.percent').should('have.length', 1);
+    cy
+      .get('div.ws-pbar div > svg > text')
+      .should( ($t) => {
+	expect($t.first()).to.contain('0%');
+	}
+      )
+      .wait(13000)
+      .then( ($t) => {
+	expect($t).to.have.text('100%');
+      });
   });
 
 });
+
