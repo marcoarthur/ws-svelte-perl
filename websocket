@@ -116,6 +116,6 @@ __DATA__
 </head>
 
 <body>
-</body>
     %= asset "app.js"
+</body>
 </html>
