@@ -50,29 +50,35 @@
   }
 </style>
 
-<div>
-  <span>The current value = {$value}</span>
-  <button disabled={$value <= 0} on:click={() => value.update(v => Math.max(0, v - 1))}>-</button>
-  <button disabled={$value >= max} on:click={() => value.update(v => Math.min(max, v + 1))}>+</button>
-  <label>
-    <input type="checkbox" bind:checked={usePercent} />
-    <span>Show as percentage</span>
-  </label>
-</div>
+<div class='manual-pbar'>
+  <div>
+    <span>The current value = {$value}</span>
+    <button disabled={$value <= 0} on:click={() => value.update(v => Math.max(0, v - 1))}>-</button>
+    <button disabled={$value >= max} on:click={() => value.update(v => Math.min(max, v + 1))}>+</button>
+    <label>
+      <input type="checkbox" bind:checked={usePercent} />
+      <span>Show as percentage</span>
+    </label>
+  </div>
 
 
-<h3> Using Controls </h3>
-<div class="progress-1">
-  <Progress value={$value} {max} {usePercent} />
+  <h3> Using Controls </h3>
+  <div class="progress-1">
+    <Progress value={$value} {max} {usePercent} />
+  </div>
 </div>
 <hr/>
-<h3> Using Web Sockets </h3>
-<div class="progress-1">
-  <Progress value={$completed} {max} {usePercent} />
+<div class="ws-pbar">
+  <h3> Using Web Sockets </h3>
+  <div class="progress-1">
+    <Progress value={$completed} {max} {usePercent} />
+  </div>
 </div>
 <hr/>
-<h3> Using Source Events </h3>
-<div class="progress-1">
-  <Progress value={$event_source} {max} {usePercent} />
+<div class="sse-pbar">
+  <h3> Using Source Events </h3>
+  <div class="progress-1">
+    <Progress value={$event_source} {max} {usePercent} />
+  </div>
 </div>
 
