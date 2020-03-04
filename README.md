@@ -9,6 +9,10 @@ operation, presenting it in a nice round bar.
 To run this simple application just:
 ```bash
 ./websocket daemon -l http://*:8080
+
+or
+
+npm start
 ```
 
 Server will be running on port 8080

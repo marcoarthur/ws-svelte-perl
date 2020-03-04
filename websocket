@@ -65,17 +65,22 @@ websocket '/ws' => sub {
 
 get '/event' => sub {
     my $c    = shift;
+    my $id;
     my $task = $c->create_task;
 
     $c->log->debug(" Received a subscriber ");
 
     $c->res->headers->content_type('text/event-stream');
     $c->write;
-    my $id = Mojo::IOLoop->recurring(
+    $id = Mojo::IOLoop->recurring(
         TIME() + 1 => sub {
             if ( my $data = $task->() ) {
                 $c->log->debug('sending tick');
                 $c->write( "event:tick\ndata:" . encode_json($data) . "\n\n" );
+            }
+            else {
+                Mojo::IOLoop->remove($id);
+                undef $id;
             }
         }
     );
@@ -116,6 +121,6 @@ __DATA__
 </head>
 
 <body>
-</body>
     %= asset "app.js"
+</body>
 </html>
