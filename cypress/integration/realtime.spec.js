@@ -1,6 +1,7 @@
 context('Progress Bars', () => {
   beforeEach(() => {
-    cy.visit('http://localhost:3000')
+    let url = Cypress.env('MOJO_APP_URL') || 'http://localhost:3000';
+    cy.visit(url)
   });
 
 
