@@ -12,9 +12,10 @@ context('Progress Bars', () => {
 
   // find websocket progress bar
   // body > div.ws-pbar > div > svg > text
+  // body > div:nth-child(7) > svg > text
   it('websocket progress bar', () => {
     cy
-      .get('div.ws-pbar div > svg > text')
+      .get('div.ws-pbar > div > svg > text')
       .should( ($t) => {
 	expect($t.first()).to.contain('0%');
 	}

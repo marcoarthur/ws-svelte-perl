@@ -4,9 +4,10 @@
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "start": "env MOJO_APP_URL='http://localhost:3000' ./websocket daemon",
+    "start": "carton exec ./websocket daemon -m production",
     "cypress": "cypress open",
-    "cy:run": "cypress run"
+    "cy:run": "cypress run",
+    "test": "./websocket daemon & cypress run"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^11.0.0",

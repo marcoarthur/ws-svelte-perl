@@ -1,0 +1,54 @@
+language: node_js
+
+node_js:
+  - 12.0
+
+addons:
+  apt:
+    packages:
+    - libgconf-2-4
+cache:
+  npm: false
+before_install:
+  - curl -L https://unpkg.com/@pnpm/self-installer | node
+  - curl -L https://cpanmin.us | perl - App::cpanminus
+  - cpanm --local-lib=~/perl5 local::lib && eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
+  - cpanm -n Carton
+install:
+  - pnpm install
+  - carton install
+
+defaults: &defaults
+  script:
+    - pnpm run build
+    - pnpm run start &
+    - pnpm run cy:run -- --record --key 582b9e4c-f02e-4bee-abb3-d76a6f5f631d --parallel --group $STAGE_NAME
+    # after all tests finish running we need
+    # to kill all background jobs (like "npm start &")
+    - kill $(jobs -p) || true
+
+jobs:
+  include:
+    # we have multiple jobs to execute using just a single stage
+    # but we can pass group name via environment variable to Cypress test runner
+    - stage: test
+      env:
+        - STAGE_NAME="1x-electron on Travis CI"
+      <<: *defaults
+    # run tests in parallel by including several test jobs with same name variable
+    - stage: test
+      env:
+        - STAGE_NAME="4x-electron on Travis CI"
+      <<: *defaults
+    - stage: test
+      env:
+        - STAGE_NAME="4x-electron on Travis CI"
+      <<: *defaults
+    - stage: test
+      env:
+        - STAGE_NAME="4x-electron on Travis CI"
+      <<: *defaults
+    - stage: test
+      env:
+        - STAGE_NAME="4x-electron on Travis CI"
+      <<: *defaults
