@@ -2,7 +2,7 @@
   "name": "svelte-app",
   "version": "1.0.0",
   "scripts": {
-    "build": "rollup -c",
+    "build": "rollup -c --environment production",
     "dev": "rollup -c -w",
     "start": "carton exec ./websocket daemon -m production",
     "cypress": "cypress open",
